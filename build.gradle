@@ -1,0 +1,113 @@
+apply plugin: 'application'
+apply plugin: 'java'
+apply plugin: 'java-library'
+apply plugin: 'eclipse'
+apply plugin: 'maven'
+
+applicationName = 'csv2d4m'
+sourceCompatibility = 1.8
+mainClassName = 'iox.csv2d4m.CSV2D4MDriver'
+group = 'iox.d4m'
+version = '0.0.1'
+
+
+def jarFile = buildDir.name + "/libs/" + applicationName + "-" + version + ".jar"
+configure(install.repositories.mavenInstaller) {
+    pom.project {
+        groupId group
+        artifactId applicationName
+        inceptionYear '2018'
+        packaging 'jar'
+    }
+}
+
+clean {
+    delete "${buildDir}" 
+    delete "${applicationName}" 
+}
+
+configurations.all {
+    exclude module: 'slf4j-log4j12'
+}
+
+repositories {
+    jcenter()
+    maven {url 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath;}
+}
+        
+sourceSets {
+    main {
+        java {
+            srcDirs 'src/main/java'
+            srcDirs 'gen/main/java'
+         }
+    }
+    test {
+        java {
+            srcDirs 'src/test/java'
+         }
+    }
+}
+
+dependencies {
+    implementation "iox.d4m:accumulo.d4m:0.0.1"
+    implementation "iox.accumulo:accumulo.access:0.0.1"
+    implementation "args4j:args4j:2.33"
+         
+
+    // Logging
+    implementation "org.apache.logging.log4j:log4j-slf4j-impl:${logver}" 
+    
+    implementation "org.apache.accumulo:accumulo-core:${accver}"
+    implementation "org.apache.accumulo:accumulo-fate:${accver}"
+    implementation "org.apache.accumulo:accumulo-start:${accver}"
+    implementation "org.apache.accumulo:accumulo-trace:${accver}"
+    implementation "org.apache.hadoop:hadoop-client:${hadver}"
+    implementation "org.apache.zookeeper:zookeeper:${zoover}"
+    implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.9.5"
+    implementation "com.fasterxml.jackson.core:jackson-databind:2.9.4"
+    implementation "org.apache.commons:commons-lang3:3.4"
+    implementation "org.apache.commons:commons-math3:3.6.1"
+    testImplementation "junit:junit:4.12"
+}
+
+uploadArchives {
+    repositories {
+       flatDir {
+           dirs 'repos'
+       }
+    }
+}
+
+println "lib=${configurations.runtimeClasspath}"
+
+task bundle {
+    dependsOn jar
+    inputs.file jarFile
+    outputs.dir applicationName
+   doLast{ 
+      copy {
+            from "${buildDir}/libs"
+            into "${applicationName}"
+            fileMode = 0777
+        }
+       copy {
+            from "conf/"
+            into "${applicationName}/conf"
+        }
+       copy {
+            from configurations.runtimeClasspath
+            into "$applicationName/lib"
+        }
+   }
+}
+jar {
+    // Keep jar clean:
+    exclude 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'META-INF/*.MF'
+    manifest {
+        attributes ('Implementation-Title' : 'CVS 2 D4M',
+                   'Implementation-Version': version,
+                   'Main-Class': mainClassName,
+                   'Class-Path': ' lib/' + configurations.runtimeClasspath.collect { it.getName() }.join(' lib/'))
+        }
+}

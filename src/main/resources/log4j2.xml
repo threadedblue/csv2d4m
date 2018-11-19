@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36}(%L) - %msg%n" />
+		</Console>
+		<File name="File" fileName="logs/csv2d4m.log" immediateFlush="false"
+			append="false">
+			<PatternLayout
+				pattern="%d{yyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36}(%L) - %msg%n" />
+		</File>
+	</Appenders>
+	<Loggers>
+        <Logger name="edu.mit.ll.d4m.db.cloud.accumulo" level="OFF">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="File"/>
+        </Logger>
+        <Logger name="iox.csv2d4m" level="INFO">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="File"/>
+        </Logger>
+        <Logger name="iox.accumulo" level="INFO">
+            <AppenderRef ref="Console" />
+            <AppenderRef ref="File"/>
+        </Logger>
+		<Root level="INFO">
+			<AppenderRef ref="Console" />
+ 			<AppenderRef ref="File"/>
+		</Root>
+	</Loggers>
+</Configuration>
