@@ -3,7 +3,6 @@ build/
 target/
 *.log
 .gradle/
-gradle/
 .DS_Store/
 repos/
 attic/
